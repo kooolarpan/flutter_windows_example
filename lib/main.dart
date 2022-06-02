@@ -34,8 +34,9 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   MethodChannel methodChannel = const MethodChannel("LogChannel");
+  EventChannel logLoopChannel = const EventChannel("LogLoopChannel");
 
-  Future<void> _incrementCounter() async {
+  Future<void> _logHalo() async {
     setState(() {
       _counter++;
     });
@@ -44,6 +45,13 @@ class _MyHomePageState extends State<MyHomePage> {
       final msg = await methodChannel.invokeMethod("logHalo");
       debugPrint(msg);
     } catch (e) {}
+  }
+
+  //接收来自平台的Event
+  void reciveEvents() async {
+    logLoopChannel.receiveBroadcastStream().listen((event) {
+      debugPrint(event);
+    });
   }
 
   @override
@@ -56,20 +64,21 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            const Text("Method Channel"),
+            //点击调用平台方法  向控制台输出信息
+            MaterialButton(
+              color: Colors.lightBlue,
+              onPressed: _logHalo,
+              child: Text("Call Platform Method"),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            const Text("Event Channel"),
+            //点击启动方法 向Flutter端发送信息流
+            MaterialButton(
+                color: Colors.lightBlue,
+                onPressed: reciveEvents,
+                child: Text("Recive Event From Platform"))
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
